@@ -1,0 +1,7 @@
+capella-ros-tools
+=================
+
+.. toctree::
+   :maxdepth: 4
+
+   capella_ros_tools

@@ -1,0 +1,34 @@
+capella\_ros\_tools package
+===========================
+
+.. automodule:: capella_ros_tools
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Submodules
+----------
+
+capella\_ros\_tools.data\_model module
+--------------------------------------
+
+.. automodule:: capella_ros_tools.data_model
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+capella\_ros\_tools.exporter module
+-----------------------------------
+
+.. automodule:: capella_ros_tools.exporter
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+capella\_ros\_tools.importer module
+-----------------------------------
+
+.. automodule:: capella_ros_tools.importer
+   :members:
+   :undoc-members:
+   :show-inheritance:
