@@ -33,7 +33,7 @@ Capella ROS Tools is a command-line application written in Python, designed to f
 
 .. toctree::
    :maxdepth: 3
-   :caption: API reference:
+   :caption: API reference
 
    code/modules
 

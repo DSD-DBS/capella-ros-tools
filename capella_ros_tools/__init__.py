@@ -1,6 +1,7 @@
 # Copyright DB InfraGO AG and contributors
 # SPDX-License-Identifier: Apache-2.0
 """The capella_ros_tools package."""
+
 import logging
 from importlib import metadata
 
@@ -10,5 +11,4 @@ except metadata.PackageNotFoundError:  # pragma: no cover
     __version__ = "0.0.0+unknown"
 del metadata
 
-logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

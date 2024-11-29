@@ -16,7 +16,10 @@ def _clean_name(name: str) -> str:
     return re.sub(r"\W", "", name)
 
 
-def export(current_pkg: information.DataPkg, current_path: pathlib.Path):
+def export(
+    current_pkg: information.DataPkg,
+    current_path: pathlib.Path,
+) -> None:
     """Export a Capella data package to ROS messages."""
     current_path.mkdir(parents=True, exist_ok=True)
     for cls_obj in current_pkg.classes:

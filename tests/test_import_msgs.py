@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 import pathlib
-import re
 
 import pytest
 from capellambse import decl, helpers
@@ -49,10 +48,10 @@ SA_ROOT = helpers.UUIDString("00000000-0000-0000-0000-000000000001")
 
 @pytest.fixture
 def importer() -> Importer:
-    return Importer(DUMMY_PATH.as_posix(), True)
+    return Importer(DUMMY_PATH.as_posix(), no_deps=True)
 
 
-def test_convert_datatype(importer: Importer):
+def test_convert_datatype(importer: Importer) -> None:
     promise_id = "std_msgs.uint8"
     expected = {
         "promise_id": "std_msgs.uint8",
@@ -67,7 +66,7 @@ def test_convert_datatype(importer: Importer):
     assert decl.dump([actual]) == decl.dump([expected])
 
 
-def test_convert_enum(importer: Importer):
+def test_convert_enum(importer: Importer) -> None:
     enum_def = EnumDef(
         name="MyEnum",
         description="An example enum",
@@ -122,13 +121,13 @@ def test_convert_enum(importer: Importer):
         },
     }
 
-    actual = importer._convert_enum("MyMessage", enum_def)
+    actual = importer._convert_enum("test_pkg", "MyMessage", enum_def)
 
     assert decl.dump([actual]) == decl.dump([expected])
     assert "MyMessage.MyEnum" in importer._promise_ids
 
 
-def test_convert_class(importer: Importer):
+def test_convert_class(importer: Importer) -> None:
     class_def = MessageDef(
         name="MyMessage",
         description="An example message",
@@ -179,7 +178,7 @@ def test_convert_class(importer: Importer):
     assert "my_package.uint8" in importer._promise_id_refs
 
 
-def test_convert_class_with_ref(importer: Importer):
+def test_convert_class_with_ref(importer: Importer) -> None:
     pkg_name = "my_package"
     msg_def = MessageDef(
         name="MyMessage",
@@ -231,19 +230,21 @@ def test_convert_class_with_ref(importer: Importer):
     assert "std_msgs.uint8" in importer._promise_id_refs
 
 
-def test_convert_package():
+def test_convert_package() -> None:
     expected = decl.dump(decl.load(SAMPLE_PACKAGE_YAML))
 
-    actual = Importer(SAMPLE_PACKAGE_PATH.as_posix(), True).to_yaml(
+    actual = Importer(SAMPLE_PACKAGE_PATH.as_posix(), no_deps=True).to_yaml(
         ROOT, SA_ROOT
     )
 
     assert actual == expected
 
 
-def test_custom_license_header():
+def test_custom_license_header() -> None:
     importer = Importer(
-        CUSTOM_LICENSE_PACKAGE_PATH.as_posix(), True, CUSTOM_LICENSE_PATH
+        CUSTOM_LICENSE_PACKAGE_PATH.as_posix(),
+        no_deps=True,
+        license_header_path=CUSTOM_LICENSE_PATH,
     )
 
     assert (
@@ -252,10 +253,10 @@ def test_custom_license_header():
     )
 
 
-def test_description_regex():
+def test_description_regex() -> None:
     importer = Importer(
         DESCRIPTION_REGEX_PACKAGE_PATH.as_posix(),
-        True,
+        no_deps=True,
         msg_description_regex=r"^Description:\s*([\s\S]*)",
     )
 

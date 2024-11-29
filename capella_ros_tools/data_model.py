@@ -35,7 +35,7 @@ VALID_REF_COMMENT_PATTERN = re.compile(
 HTML_TAG_PATTERN = re.compile("<.*?>")
 
 
-def _clean_html(raw_html: str):
+def _clean_html(raw_html: str) -> str:
     return re.sub(HTML_TAG_PATTERN, "", raw_html)
 
 
@@ -89,10 +89,12 @@ class TypeDef:
                     Range(max_card, max_card) if max_card else Range("0", "*")
                 )
 
-        if len(temp := name.split(PACKAGE_NAME_MESSAGE_TYPE_SEPARATOR)) == 2:
-            package, name = temp
-        else:
-            package = None
+        match name.split(PACKAGE_NAME_MESSAGE_TYPE_SEPARATOR):
+            case [p, n]:
+                package: str | None = p
+                name = n
+            case _:
+                package = None
 
         return cls(name, card, package)
 
@@ -164,19 +166,18 @@ def _process_block_comment(line: str) -> str:
 
 def _extract_file_level_comments(
     msg_string: str, regex: re.Pattern | None = None
-) -> t.Tuple[str, list[str]]:
+) -> tuple[str, list[str]]:
     """Extract comments at the beginning of the message."""
     lines = msg_string.lstrip("\n").splitlines()
     lines.append("")
     file_level_comments = ""
     i = 0
-    for i, line in enumerate(lines):
+    for i, line in enumerate(lines):  # noqa: B007
         line = line.strip()
         if not line.startswith(COMMENT_DELIMITER):
             if line:
                 return "", lines
-            else:
-                break
+            break
         file_level_comments += _process_block_comment(line) or "\n"
 
     if regex is not None:
@@ -239,7 +240,7 @@ class MessageDef:
         )
 
     @classmethod
-    def from_string(
+    def from_string(  # noqa: C901 # FIXME too complex
         cls,
         pkg_name: str,
         msg_name: str,
@@ -333,7 +334,6 @@ class MessageDef:
             _process_comment(field)
 
         for enum in msg.enums:
-
             common_prefix = _process_enums(enum)
 
             if common_prefix:
@@ -382,7 +382,7 @@ def _process_comment(field: FieldDef) -> None:
         field.type.package = ref_msg_name
         if ref_const_name:
             field.type.name = _get_enum_identifier(
-                ref_const_name.rstrip("_XXX")
+                ref_const_name.removesuffix("_XXX")
             )
         else:
             field.type.name = ref_msg_name

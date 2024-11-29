@@ -36,7 +36,7 @@ SAMPLE_PACKAGE_PATH2 = PATH.joinpath("data/data_model/example_msgs/package2")
 
 
 @pytest.mark.parametrize(
-    "params, expected",
+    ("params", "expected"),
     [
         (
             ("test_name", Range("1", "1"), "test_package"),
@@ -60,7 +60,9 @@ SAMPLE_PACKAGE_PATH2 = PATH.joinpath("data/data_model/example_msgs/package2")
         ),
     ],
 )
-def test_TypeDef_str(params: tuple[str, Range, str | None], expected: str):
+def test_TypeDef_str(
+    params: tuple[str, Range, str | None], expected: str
+) -> None:
     type_def = TypeDef(*params)
 
     actual = str(type_def)
@@ -69,7 +71,7 @@ def test_TypeDef_str(params: tuple[str, Range, str | None], expected: str):
 
 
 @pytest.mark.parametrize(
-    "type_str, params",
+    ("type_str", "params"),
     [
         (
             "test_package/test_name",
@@ -91,7 +93,7 @@ def test_TypeDef_str(params: tuple[str, Range, str | None], expected: str):
 )
 def test_TypeDef_from_string(
     type_str: str, params: tuple[str, Range, str | None]
-):
+) -> None:
     expected = TypeDef(*params)
 
     actual = TypeDef.from_string(type_str)
@@ -100,7 +102,7 @@ def test_TypeDef_from_string(
 
 
 @pytest.mark.parametrize(
-    "params, expected",
+    ("params", "expected"),
     [
         (
             (
@@ -116,7 +118,7 @@ def test_TypeDef_from_string(
         ),
     ],
 )
-def test_FieldDef_str(params: tuple[TypeDef, str, str], expected: str):
+def test_FieldDef_str(params: tuple[TypeDef, str, str], expected: str) -> None:
     field_def = FieldDef(*params)
 
     actual = str(field_def)
@@ -125,7 +127,7 @@ def test_FieldDef_str(params: tuple[TypeDef, str, str], expected: str):
 
 
 @pytest.mark.parametrize(
-    "params, expected",
+    ("params", "expected"),
     [
         (
             (
@@ -142,7 +144,9 @@ def test_FieldDef_str(params: tuple[TypeDef, str, str], expected: str):
         ),
     ],
 )
-def test_ConstantDef_str(params: tuple[TypeDef, str, str, str], expected: str):
+def test_ConstantDef_str(
+    params: tuple[TypeDef, str, str, str], expected: str
+) -> None:
     constant_def = ConstantDef(*params)
 
     actual = str(constant_def)
@@ -152,7 +156,7 @@ def test_ConstantDef_str(params: tuple[TypeDef, str, str, str], expected: str):
 
 class TestComments:
     @staticmethod
-    def test_extract_file_level_comments_no_comments():
+    def test_extract_file_level_comments_no_comments() -> None:
         msg_string = """uint8 OK = 0
 uint8 WARN = 1
 uint8 ERROR = 2"""
@@ -161,7 +165,7 @@ uint8 ERROR = 2"""
         assert comments == ""
 
     @staticmethod
-    def test_extract_file_level_comments_no_newline():
+    def test_extract_file_level_comments_no_newline() -> None:
         msg_string = """# This is a comment
 # This is another comment
 uint8 OK = 0
@@ -172,7 +176,7 @@ uint8 ERROR = 2"""
         assert comments == ""
 
     @staticmethod
-    def test_extract_file_level_comments():
+    def test_extract_file_level_comments() -> None:
         msg_string = """# This is a comment
 # This is another comment
 
@@ -185,7 +189,7 @@ uint8 ERROR = 2"""
         assert comments == expected
 
     @staticmethod
-    def test_extract_file_level_comments_with_newline():
+    def test_extract_file_level_comments_with_newline() -> None:
         msg_string = """# This is a comment
 #
 # This is another comment"""
@@ -195,7 +199,7 @@ uint8 ERROR = 2"""
         assert comments == expected
 
     @staticmethod
-    def test_extract_file_level_comments_strip_empty_lines_at_top():
+    def test_extract_file_level_comments_strip_empty_lines_at_top() -> None:
         msg_string = """
 
 # This is a comment
@@ -209,9 +213,9 @@ uint8 ERROR = 2"""
         assert comments == expected
 
     @staticmethod
-    def test_parse_comments_no_comments():
+    def test_parse_comments_no_comments() -> None:
         msg_string = """uint8 field"""
-        msg_def = MessageDef.from_string("test_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "test_name", msg_string)
         expected = MessageDef(
             name="test_name",
             fields=[
@@ -228,13 +232,13 @@ uint8 ERROR = 2"""
         assert msg_def == expected
 
     @staticmethod
-    def test_parse_comments_block_comments():
+    def test_parse_comments_block_comments() -> None:
         msg_string = """# Here is text.
 # Here is more text.
 #
 # This is unrelated text.
 uint8 field"""
-        msg_def = MessageDef.from_string("test_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "test_name", msg_string)
         expected = MessageDef(
             name="test_name",
             fields=[
@@ -252,12 +256,12 @@ uint8 field"""
         assert msg_def == expected
 
     @staticmethod
-    def test_parse_comments_inline_comments():
+    def test_parse_comments_inline_comments() -> None:
         msg_string = """uint8 field     # Here is text.
                                         # Here is more text.
                                         #
                                         # This is unrelated text."""
-        msg_def = MessageDef.from_string("test_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "test_name", msg_string)
         expected = MessageDef(
             name="test_name",
             fields=[
@@ -275,12 +279,12 @@ uint8 field"""
         assert msg_def == expected
 
     @staticmethod
-    def test_parse_comments_mixed_comments():
+    def test_parse_comments_mixed_comments() -> None:
         msg_string = """# This is a block comment.
 # This is still a block comment.
 uint8 field     # This is an inline comment.
                 # This is still an inline comment."""
-        msg_def = MessageDef.from_string("test_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "test_name", msg_string)
         expected = MessageDef(
             name="test_name",
             fields=[
@@ -338,32 +342,31 @@ class TestMergeEnumDef:
         return MessageDef("enum_name", [], [enum_def], "")
 
     @staticmethod
-    def test_merge_enums_before(expected: MessageDef):
-
+    def test_merge_enums_before(expected: MessageDef) -> None:
         msg_string = """
 uint8 OK = 0
 
 uint8 WARN = 1
 uint8 ERROR = 2
 uint8 STALE = 3"""
-        msg_def = MessageDef.from_string("enum_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "enum_name", msg_string)
 
         assert msg_def == expected
 
     @staticmethod
-    def test_merge_enums_after(expected: MessageDef):
+    def test_merge_enums_after(expected: MessageDef) -> None:
         msg_string = """
 uint8 OK = 0
 uint8 WARN = 1
 uint8 ERROR = 2
 
 uint8 STALE = 3"""
-        msg_def = MessageDef.from_string("enum_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "enum_name", msg_string)
 
         assert msg_def == expected
 
     @staticmethod
-    def test_merge_enums_multiple_after(expected: MessageDef):
+    def test_merge_enums_multiple_after(expected: MessageDef) -> None:
         msg_string = """
 uint8 OK = 0
 uint8 WARN = 1
@@ -371,12 +374,12 @@ uint8 WARN = 1
 uint8 ERROR = 2
 
 uint8 STALE = 3"""
-        msg_def = MessageDef.from_string("enum_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "enum_name", msg_string)
 
         assert msg_def == expected
 
     @staticmethod
-    def test_merge_enums_multiple_before(expected: MessageDef):
+    def test_merge_enums_multiple_before(expected: MessageDef) -> None:
         msg_string = """
 uint8 OK = 0
 
@@ -384,12 +387,12 @@ uint8 WARN = 1
 
 uint8 ERROR = 2
 uint8 STALE = 3"""
-        msg_def = MessageDef.from_string("enum_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "enum_name", msg_string)
 
         assert msg_def == expected
 
 
-def test_enum_non_ascending_values():
+def test_enum_non_ascending_values() -> None:
     msg_string = """
 uint8 SHAPE_TYPE_UNDEFINED = 0
 
@@ -403,7 +406,7 @@ uint8 SHAPE_TYPE_SPHERE = 2
 uint8 SHAPE_TYPE_VERTICAL_STRUCTURE = 10
 uint8 SHAPE_TYPE_VERTICAL_STRUCTURE_WITH_RADIUS = 101
 uint8 SHAPE_TYPE_HORIZONTAL_STRUCTURE = 11"""
-    msg_def = MessageDef.from_string("ShapeTypes", msg_string)
+    msg_def = MessageDef.from_string("test_pkg", "ShapeTypes", msg_string)
     expected = MessageDef(
         name="ShapeTypes",
         fields=[],
@@ -459,12 +462,12 @@ uint8 SHAPE_TYPE_HORIZONTAL_STRUCTURE = 11"""
 
 class TestEnumName:
     @staticmethod
-    def test_enum_name_commonprefix_no_underscore():
+    def test_enum_name_commonprefix_no_underscore() -> None:
         msg_string = """
 uint8 START = 0
 uint8 STOP = 1
 int8 field"""
-        msg_def = MessageDef.from_string("enum_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "enum_name", msg_string)
         expected = "enum_nameType"
 
         actual = msg_def.enums[0].name
@@ -472,12 +475,12 @@ int8 field"""
         assert actual == expected
 
     @staticmethod
-    def test_enum_name_commonprefix_with_underscore():
+    def test_enum_name_commonprefix_with_underscore() -> None:
         msg_string = """
 uint8 ST_ART = 0
 uint8 ST_OP = 1
 int8 field"""
-        msg_def = MessageDef.from_string("enum_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "enum_name", msg_string)
         expected = "St"
 
         actual = msg_def.enums[0].name
@@ -485,12 +488,12 @@ int8 field"""
         assert actual == expected
 
     @staticmethod
-    def test_enum_name_commonprefix_with_multiple_underscore():
+    def test_enum_name_commonprefix_with_multiple_underscore() -> None:
         msg_string = """
 uint8 S_T_ART = 0
 uint8 S_T_OP = 1
 int8 field"""
-        msg_def = MessageDef.from_string("enum_name", msg_string)
+        msg_def = MessageDef.from_string("test_pkg", "enum_name", msg_string)
         expected = "ST"
 
         actual = msg_def.enums[0].name
@@ -498,7 +501,7 @@ int8 field"""
         assert actual == expected
 
     @staticmethod
-    def test_enum_name_match():
+    def test_enum_name_match() -> None:
         msg_string = """
 int8 STATUS_NO_FIX =  -1
 int8 STATUS_FIX =      0
@@ -513,7 +516,9 @@ uint16 SERVICE_COMPASS = 4
 uint16 SERVICE_GALILEO = 8
 
 uint16 service"""
-        msg_def = MessageDef.from_string("NavSatStatus", msg_string)
+        msg_def = MessageDef.from_string(
+            "test_pkg", "NavSatStatus", msg_string
+        )
         expected = MessageDef(
             name="NavSatStatus",
             fields=[
@@ -596,25 +601,25 @@ uint16 service"""
         assert msg_def == expected
 
 
-def test_MessageDef_class(sample_class_def: MessageDef):
+def test_MessageDef_class(sample_class_def: MessageDef) -> None:
     msg_path = SAMPLE_CLASS_PATH
-    msg_def = MessageDef.from_file(msg_path)
+    msg_def = MessageDef.from_file("test_pkg", msg_path)
     expected = sample_class_def
 
     assert msg_def == expected
 
 
-def test_MessageDef_enum(sample_enum_def: MessageDef):
+def test_MessageDef_enum(sample_enum_def: MessageDef) -> None:
     msg_path = SAMPLE_ENUM_PATH
-    msg_def = MessageDef.from_file(msg_path)
+    msg_def = MessageDef.from_file("test_pkg", msg_path)
     expected = sample_enum_def
 
     assert msg_def == expected
 
 
-def test_MessageDef_class_enum(sample_class_enum_def: MessageDef):
+def test_MessageDef_class_enum(sample_class_enum_def: MessageDef) -> None:
     msg_path = SAMPLE_CLASS_ENUM_PATH
-    msg_def = MessageDef.from_file(msg_path)
+    msg_def = MessageDef.from_file("package2", msg_path)
     expected = sample_class_enum_def
 
     assert msg_def == expected
@@ -629,7 +634,7 @@ def test_MessageDef_class_enum(sample_class_enum_def: MessageDef):
 )
 def test_MessagePkgDef_from_msg_folder(
     msg_pkg_path: abc.AbstractFilePath | pathlib.Path,
-):
+) -> None:
     message_pkg_def = MessagePkgDef.from_msg_folder("", msg_pkg_path)
 
     assert message_pkg_def.messages

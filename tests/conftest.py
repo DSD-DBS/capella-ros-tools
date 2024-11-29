@@ -14,7 +14,7 @@ from capella_ros_tools.data_model import (
 
 
 @pytest.fixture
-def sample_class_def():
+def sample_class_def() -> MessageDef:
     return MessageDef(
         name="SampleClass",
         fields=[
@@ -71,7 +71,7 @@ def sample_class_def():
 
 
 @pytest.fixture
-def sample_enum_def():
+def sample_enum_def() -> MessageDef:
     return MessageDef(
         name="SampleEnum",
         fields=[],
@@ -152,7 +152,7 @@ def sample_enum_def():
 
 
 @pytest.fixture
-def sample_class_enum_def():
+def sample_class_enum_def() -> MessageDef:
     return MessageDef(
         name="SampleClassEnum",
         fields=[

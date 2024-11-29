@@ -1,6 +1,7 @@
 # Copyright DB InfraGO AG and contributors
 # SPDX-License-Identifier: Apache-2.0
 """Tool for importing ROS messages to a Capella data package."""
+
 import json
 import os
 import pathlib
@@ -28,7 +29,7 @@ class Importer:
     def __init__(
         self,
         msg_path: str,
-        no_deps: bool,
+        no_deps: bool,  # noqa: FBT001
         license_header_path: pathlib.Path | None = None,
         msg_description_regex: str | None = None,
         dependency_json: pathlib.Path | None = None,
@@ -64,7 +65,7 @@ class Importer:
         name: str,
         path: str,
         msg_description_regex: str | None = None,
-        **kwargs,
+        **kwargs: t.Any,
     ) -> None:
         root = filehandler.get_filehandler(path, **kwargs).rootdir
         msg_description_pattern = None
@@ -89,14 +90,13 @@ class Importer:
             _type = "BooleanType"
         else:
             _type = "NumericType"
-        yml = {
+        return {
             "promise_id": promise_id,
             "find": {
                 "name": name,
                 "_type": _type,
             },
         }
-        return yml
 
     def _convert_package(
         self,
@@ -172,7 +172,7 @@ class Importer:
                 prop_promise_id
             ] = (promise_id, promise_ref)
 
-        yml = {
+        return {
             "promise_id": promise_id,
             "find": {
                 "name": msg_def.name,
@@ -186,7 +186,6 @@ class Importer:
                 "properties": props,
             },
         }
-        return yml
 
     def _convert_enum(
         self, pkg_name: str, msg_name: str, enum_def: data_model.EnumDef
@@ -209,7 +208,7 @@ class Importer:
                 literal_yml["set"]["description"] = literal.description
             literals.append(literal_yml)
 
-        types = set(lit.type.name for lit in enum_def.literals)
+        types = {lit.type.name for lit in enum_def.literals}
         assert len(types) == 1, "All values of an Enum must have the same type"
         promise_ref = f"{pkg_name}.{types.pop()}"
         self._promise_id_refs[promise_ref] = None
@@ -220,7 +219,7 @@ class Importer:
         if enum_def.description:
             set_values["description"] = enum_def.description
 
-        yml = {
+        return {
             "promise_id": promise_id,
             "find": {
                 "name": enum_def.name,
@@ -230,8 +229,6 @@ class Importer:
                 "literals": literals,
             },
         }
-
-        return yml
 
     def to_yaml(
         self,
