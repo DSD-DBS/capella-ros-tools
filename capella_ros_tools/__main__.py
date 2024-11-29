@@ -123,8 +123,9 @@ def import_msgs(
         logger.info("Writing declarative YAML to file %s", output)
         output.write_text(yml, encoding="utf-8")
     else:
-        logger.info("Writing to model %s", model.name)
+        logger.info("Applying changes to model %r", model.name)
         decl.apply(model, io.StringIO(yml))
+        logger.info("Saving model")
         model.save()
 
 
