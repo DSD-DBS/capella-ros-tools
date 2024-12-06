@@ -2,9 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 """Tool for importing ROS messages to a Capella data package."""
 
-import json
+import collections.abc as cabc
 import os
-import pathlib
 import re
 import typing as t
 
@@ -29,36 +28,32 @@ class Importer:
     def __init__(
         self,
         msg_path: str,
-        no_deps: bool,  # noqa: FBT001
-        license_header_path: pathlib.Path | None = None,
+        *,
+        license_header: str = "",
+        dependencies: (
+            cabc.Mapping[str, str | cabc.Mapping[str, t.Any]] | None
+        ) = None,
         msg_description_regex: str | None = None,
-        dependency_json: pathlib.Path | None = None,
     ):
-        if dependency_json:
-            dependencies = json.loads(dependency_json.read_bytes())
-        else:
+        if dependencies is None:
             dependencies = ROS2_INTERFACES
 
         self.messages = data_model.MessagePkgDef("root", [], [])
         self._promise_ids: dict[str, None] = {}
         self._promise_id_refs: dict[str, None] = {}
         self._needed_associations: dict[str, dict[str, tuple[str, str]]] = {}
-        self._license_header = None
-        if license_header_path is not None:
-            self._license_header = license_header_path.read_text("utf-8")
+        self._license_header = license_header
 
         self._add_packages("ros_msgs", msg_path, msg_description_regex)
-        if no_deps:
-            return
 
-        for interface_name, interface_spec in dependencies.items():
-            kwargs = {}
-            if isinstance(interface_spec, dict):
-                interface_url = interface_spec.pop("path")
-                kwargs.update(interface_spec)
-            else:
-                interface_url = interface_spec
-            self._add_packages(interface_name, interface_url, **kwargs)
+        for name, spec in dependencies.items():
+            if isinstance(spec, cabc.Mapping) and "path" not in spec:
+                raise ValueError(
+                    f"Missing 'path' key in dependency spec for {name}"
+                )
+            if isinstance(spec, str):
+                spec = {"path": spec}
+            self._add_packages(name, **spec)
 
     def _add_packages(
         self,
@@ -77,7 +72,10 @@ class Importer:
         for dir in sorted(root.rglob("msg"), key=os.fspath):
             pkg_name = dir.parent.name or name
             pkg_def = data_model.MessagePkgDef.from_msg_folder(
-                pkg_name, dir, self._license_header, msg_description_pattern
+                pkg_name,
+                dir,
+                license_header=self._license_header,
+                msg_description_regex=msg_description_pattern,
             )
             self.messages.packages.append(pkg_def)
             logger.info("Loaded package %s from %s", pkg_name, dir)

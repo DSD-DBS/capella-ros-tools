@@ -3,6 +3,7 @@
 """Main entry point into Capella ROS Tools."""
 
 import io
+import json
 import logging
 import pathlib
 import uuid
@@ -74,6 +75,7 @@ def cli() -> None:
 )
 @click.option(
     "--license-header",
+    "license_header_path",
     type=click.Path(path_type=pathlib.Path, dir_okay=False),
     help="Ignore the license header from the given file when importing msgs.",
 )
@@ -96,7 +98,7 @@ def import_msgs(
     types: uuid.UUID,
     no_deps: bool,
     output: pathlib.Path,
-    license_header: pathlib.Path | None,
+    license_header_path: pathlib.Path | None,
     description_regex: str | None,
     dependency_json: pathlib.Path | None,
 ) -> None:
@@ -113,12 +115,31 @@ def import_msgs(
     else:
         params = {"types_parent_uuid": model.sa.data_package.uuid}
 
-    parsed = importer.Importer(
-        input, no_deps, license_header, description_regex, dependency_json
-    )
-    logger.info("Loaded %d packages", len(parsed.messages.packages))
+    if dependency_json:
+        if no_deps:
+            raise click.UsageError(
+                "--no-deps and --dependency-json are mutually exclusive"
+            )
+        dependencies = json.loads(dependency_json.read_text())
+    elif no_deps:
+        dependencies = {}
+    else:
+        dependencies = None
 
-    yml = parsed.to_yaml(root_uuid, **params)
+    if license_header_path is None:
+        license_header = ""
+    else:
+        license_header = license_header_path.read_text()
+
+    imp = importer.Importer(
+        input,
+        dependencies=dependencies,
+        license_header=license_header,
+        msg_description_regex=description_regex,
+    )
+    logger.info("Loaded %d packages", len(imp.messages.packages))
+
+    yml = imp.to_yaml(root_uuid, **params)
     if output:
         logger.info("Writing declarative YAML to file %s", output)
         output.write_text(yml, encoding="utf-8")

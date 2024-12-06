@@ -35,6 +35,14 @@ SAMPLE_PACKAGE_PATH1 = PATH.joinpath("data/data_model/example_msgs/package1")
 SAMPLE_PACKAGE_PATH2 = PATH.joinpath("data/data_model/example_msgs/package2")
 
 
+# REUSE-IgnoreStart
+SAMPLE_LICENSE_HEADER = """\
+# SPDX-FileCopyrightText: Copyright DB InfraGO AG
+# SPDX-License-Identifier: Apache-2.0
+"""
+# REUSE-IgnoreEnd
+
+
 @pytest.mark.parametrize(
     ("params", "expected"),
     [
@@ -603,7 +611,11 @@ uint16 service"""
 
 def test_MessageDef_class(sample_class_def: MessageDef) -> None:
     msg_path = SAMPLE_CLASS_PATH
-    msg_def = MessageDef.from_file("test_pkg", msg_path)
+    msg_def = MessageDef.from_file(
+        "test_pkg",
+        msg_path,
+        license_header=SAMPLE_LICENSE_HEADER,
+    )
     expected = sample_class_def
 
     assert msg_def == expected
@@ -611,7 +623,11 @@ def test_MessageDef_class(sample_class_def: MessageDef) -> None:
 
 def test_MessageDef_enum(sample_enum_def: MessageDef) -> None:
     msg_path = SAMPLE_ENUM_PATH
-    msg_def = MessageDef.from_file("test_pkg", msg_path)
+    msg_def = MessageDef.from_file(
+        "test_pkg",
+        msg_path,
+        license_header=SAMPLE_LICENSE_HEADER,
+    )
     expected = sample_enum_def
 
     assert msg_def == expected
@@ -619,7 +635,11 @@ def test_MessageDef_enum(sample_enum_def: MessageDef) -> None:
 
 def test_MessageDef_class_enum(sample_class_enum_def: MessageDef) -> None:
     msg_path = SAMPLE_CLASS_ENUM_PATH
-    msg_def = MessageDef.from_file("package2", msg_path)
+    msg_def = MessageDef.from_file(
+        "package2",
+        msg_path,
+        license_header=SAMPLE_LICENSE_HEADER,
+    )
     expected = sample_class_enum_def
 
     assert msg_def == expected
@@ -635,6 +655,10 @@ def test_MessageDef_class_enum(sample_class_enum_def: MessageDef) -> None:
 def test_MessagePkgDef_from_msg_folder(
     msg_pkg_path: abc.AbstractFilePath | pathlib.Path,
 ) -> None:
-    message_pkg_def = MessagePkgDef.from_msg_folder("", msg_pkg_path)
+    message_pkg_def = MessagePkgDef.from_msg_folder(
+        "",
+        msg_pkg_path,
+        license_header=SAMPLE_LICENSE_HEADER,
+    )
 
     assert message_pkg_def.messages

@@ -12,11 +12,6 @@ from dataclasses import dataclass
 
 from capellambse.filehandler import abc
 
-LICENSE_HEADER = (
-    pathlib.Path(__file__)
-    .parent.joinpath(".license_header.txt")
-    .read_text(encoding="utf-8")
-)
 PACKAGE_NAME_MESSAGE_TYPE_SEPARATOR = "/"
 COMMENT_DELIMITER = "#"
 CONSTANT_SEPARATOR = "="
@@ -227,14 +222,13 @@ class MessageDef:
         cls,
         pkg_name: str,
         file: abc.AbstractFilePath | pathlib.Path,
-        license_header: str | None = None,
+        *,
+        license_header: str,
         msg_description_regex: re.Pattern[str] | None = None,
     ) -> MessageDef:
         """Create message definition from a .msg file."""
         msg_name = file.stem
-        msg_string = file.read_text()
-        license_header = license_header or LICENSE_HEADER
-        msg_string = msg_string.removeprefix(license_header)
+        msg_string = file.read_text().removeprefix(license_header)
         return cls.from_string(
             pkg_name, msg_name, msg_string, msg_description_regex
         )
@@ -416,7 +410,7 @@ class MessagePkgDef:
         cls,
         pkg_name: str,
         msg_path: abc.AbstractFilePath | pathlib.Path,
-        license_header: str | None = None,
+        license_header: str,
         msg_description_regex: re.Pattern[str] | None = None,
     ) -> MessagePkgDef:
         """Create a message package definition from a folder."""
@@ -427,7 +421,10 @@ class MessagePkgDef:
         )
         for msg_file in sorted(files, key=os.fspath):
             msg_def = MessageDef.from_file(
-                pkg_name, msg_file, license_header, msg_description_regex
+                pkg_name,
+                msg_file,
+                license_header=license_header,
+                msg_description_regex=msg_description_regex,
             )
             out.messages.append(msg_def)
         return out

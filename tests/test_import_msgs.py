@@ -29,9 +29,6 @@ DESCRIPTION_REGEX_PACKAGE_PATH = PATH.joinpath(
 )
 SAMPLE_PACKAGE_YAML = PATH.joinpath("data/data_model/example_msgs.yaml")
 DUMMY_PATH = PATH.joinpath("data/empty_project_60")
-CUSTOM_LICENSE_PATH = PATH.joinpath(
-    "data/data_model/custom_license_header.txt"
-)
 EXPECTED_DESCRIPTION_SAMPLE_CLASS_ENUM = (
     "SampleClassEnum.msg "
     "Properties in SampleClassEnum can reference enums in the same file. "
@@ -45,10 +42,23 @@ EXPECTED_DESCRIPTION_REGEX = (
 ROOT = helpers.UUIDString("00000000-0000-0000-0000-000000000000")
 SA_ROOT = helpers.UUIDString("00000000-0000-0000-0000-000000000001")
 
+# REUSE-IgnoreStart
+SAMPLE_LICENSE_HEADER = """\
+# SPDX-FileCopyrightText: Copyright DB InfraGO AG
+# SPDX-License-Identifier: Apache-2.0
+"""
+
+LONG_SAMPLE_LICENSE_HEADER = """\
+# SPDX-FileCopyrightText: Copyright DB InfraGO AG
+# SPDX-License-Identifier: Apache-2.0
+# Additional Stuff to be removed
+"""
+# REUSE-IgnoreEnd
+
 
 @pytest.fixture
 def importer() -> Importer:
-    return Importer(DUMMY_PATH.as_posix(), no_deps=True)
+    return Importer(DUMMY_PATH.as_posix(), dependencies={})
 
 
 def test_convert_datatype(importer: Importer) -> None:
@@ -233,9 +243,11 @@ def test_convert_class_with_ref(importer: Importer) -> None:
 def test_convert_package() -> None:
     expected = decl.dump(decl.load(SAMPLE_PACKAGE_YAML))
 
-    actual = Importer(SAMPLE_PACKAGE_PATH.as_posix(), no_deps=True).to_yaml(
-        ROOT, SA_ROOT
-    )
+    actual = Importer(
+        SAMPLE_PACKAGE_PATH.as_posix(),
+        dependencies={},
+        license_header=SAMPLE_LICENSE_HEADER,
+    ).to_yaml(ROOT, SA_ROOT)
 
     assert actual == expected
 
@@ -243,8 +255,8 @@ def test_convert_package() -> None:
 def test_custom_license_header() -> None:
     importer = Importer(
         CUSTOM_LICENSE_PACKAGE_PATH.as_posix(),
-        no_deps=True,
-        license_header_path=CUSTOM_LICENSE_PATH,
+        dependencies={},
+        license_header=LONG_SAMPLE_LICENSE_HEADER,
     )
 
     assert (
@@ -256,7 +268,7 @@ def test_custom_license_header() -> None:
 def test_description_regex() -> None:
     importer = Importer(
         DESCRIPTION_REGEX_PACKAGE_PATH.as_posix(),
-        no_deps=True,
+        dependencies={},
         msg_description_regex=r"^Description:\s*([\s\S]*)",
     )
 
