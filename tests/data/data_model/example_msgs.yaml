@@ -44,7 +44,7 @@
                 min_card: !new_object
                   _type: LiteralNumericValue
                   value: '0'
-                type: !promise 'package2.SampleClassEnum'
+                type: !promise 'package1.SampleClassEnum'
             - find:
                 name: sample_field3
               promise_id: package1.SampleClass.sample_field3
@@ -74,7 +74,7 @@
                 min_card: !new_object
                   _type: LiteralNumericValue
                   value: '1'
-                type: !promise 'SampleEnum.SampleEnum'
+                type: !promise 'package1.SampleEnum.SampleEnum'
             - find:
                 name: sample_field5
               promise_id: package1.SampleClass.sample_field5
@@ -90,14 +90,15 @@
                 min_card: !new_object
                   _type: LiteralNumericValue
                   value: '1'
-                type: !promise 'SampleEnum.SampleEnumValue'
+                type: !promise 'package2.SampleEnum.SampleEnumValue'
         enumerations:
         - find:
             name: SampleEnumValue
-          promise_id: SampleEnum.SampleEnumValue
+          promise_id: package1.SampleEnum.SampleEnumValue
           set:
             description: 'SampleEnum.msg This block comment is added to the enum description
               of SampleEnumValue. '
+            domain_type: !promise 'package1.uint8'
           sync:
             literals:
             - find:
@@ -132,11 +133,12 @@
                   value: '3'
         - find:
             name: SampleEnum
-          promise_id: SampleEnum.SampleEnum
+          promise_id: package1.SampleEnum.SampleEnum
           set:
             description: 'This block comment is added to the enum description of SampleEnum.
               In a file, there can only be one or no enum whose literal names do not
               share a common prefix. '
+            domain_type: !promise 'package1.uint8'
           sync:
             literals:
             - find:
@@ -265,9 +267,10 @@
         enumerations:
         - find:
             name: SampleClassEnumStatus
-          promise_id: SampleClassEnum.SampleClassEnumStatus
+          promise_id: package2.SampleClassEnum.SampleClassEnumStatus
           set:
             description: 'This block comment is added to the enum description of SampleClassEnumStatus. '
+            domain_type: !promise 'package2.uint8'
           sync:
             literals:
             - find:
@@ -296,9 +299,10 @@
                   value: '3'
         - find:
             name: Color
-          promise_id: SampleClassEnum.Color
+          promise_id: package2.SampleClassEnum.Color
           set:
             description: 'This block comment is added to the enum description of Color. '
+            domain_type: !promise 'package2.uint8'
           sync:
             literals:
             - find:
@@ -356,6 +360,12 @@
   set:
     kind: UNSET
 - parent: !promise 'package1.SampleClass.sample_field3'
+  set:
+    kind: UNSET
+- parent: !promise 'package1.SampleClass.sample_field4'
+  set:
+    kind: UNSET
+- parent: !promise 'package1.SampleClass.sample_field5'
   set:
     kind: UNSET
 - parent: !promise 'package2.SampleClassEnum.field'

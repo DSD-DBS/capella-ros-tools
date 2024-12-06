@@ -34,11 +34,6 @@ EXPECTED_DESCRIPTION_SAMPLE_CLASS_ENUM = (
     "Properties in SampleClassEnum can reference enums in the same file. "
 )
 
-EXPECTED_DESCRIPTION_REGEX = (
-    "Message type for providing the made decision. "
-    "An additional description line. <br>Expect linebreak "
-)
-
 ROOT = helpers.UUIDString("00000000-0000-0000-0000-000000000000")
 SA_ROOT = helpers.UUIDString("00000000-0000-0000-0000-000000000001")
 
@@ -96,12 +91,13 @@ def test_convert_enum(importer: Importer) -> None:
         ],
     )
     expected = {
-        "promise_id": "MyMessage.MyEnum",
+        "promise_id": "test_pkg.MyMessage.MyEnum",
         "find": {
             "name": "MyEnum",
         },
         "set": {
             "description": "An example enum",
+            "domain_type": decl.Promise("test_pkg.uint8"),
         },
         "sync": {
             "literals": [
@@ -134,7 +130,7 @@ def test_convert_enum(importer: Importer) -> None:
     actual = importer._convert_enum("test_pkg", "MyMessage", enum_def)
 
     assert decl.dump([actual]) == decl.dump([expected])
-    assert "MyMessage.MyEnum" in importer._promise_ids
+    assert "test_pkg.MyMessage.MyEnum" in importer._promise_ids
 
 
 def test_convert_class(importer: Importer) -> None:
@@ -269,10 +265,12 @@ def test_description_regex() -> None:
     importer = Importer(
         DESCRIPTION_REGEX_PACKAGE_PATH.as_posix(),
         dependencies={},
+        license_header=SAMPLE_LICENSE_HEADER,
         msg_description_regex=r"^Description:\s*([\s\S]*)",
     )
 
-    assert (
-        importer.messages.packages[0].messages[0].description
-        == EXPECTED_DESCRIPTION_REGEX
+    assert importer.messages.packages[0].messages[0].description == (
+        "Message type for providing the made decision. "
+        "An additional description line. "
+        "<br>Expect linebreak "
     )
