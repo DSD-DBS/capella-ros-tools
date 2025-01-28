@@ -1,0 +1,14 @@
+{#
+    Copyright DB InfraGO AG and contributors
+    SPDX-License-Identifier: Apache-2.0
+#}
+# {{msg.name}}
+{% for doc_line in msg.docstr -%}
+# {{doc_line}}
+{% endfor -%}
+{% for literal in msg.literals %}
+{% for doc_line in literal.docstr -%}
+# {{doc_line}}
+{% endfor -%}
+{{ literal.type }} {{ literal.name }}{% if literal.value %} = {{literal.value}}{% endif %}
+{% endfor %}

@@ -4,14 +4,16 @@
 
 import io
 import pathlib
+import typing
 import uuid
 
 import capellambse
 import click
+import yaml
 from capellambse import cli_helpers, decl
 
 import capella_ros_tools
-from capella_ros_tools import exporter, importer, logger
+from capella_ros_tools import configured_exporter, exporter, importer, logger
 
 
 @click.group()
@@ -169,6 +171,44 @@ def export_capella(
         raise click.UsageError("Either --root or --layer must be provided")
 
     exporter.export(current_pkg, output)  # type: ignore
+
+
+@cli.command("configured-export")
+@click.option(
+    "-m",
+    "--model",
+    type=cli_helpers.ModelCLI(),
+    required=True,
+    help="Path to the Capella model.",
+    envvar="CAPELLA_ROS_TOOLS_MODEL",
+)
+@click.option(
+    "-c",
+    "--config",
+    type=click.File(mode="r", encoding="utf8"),
+    required=True,
+    envvar="CAPELLA_ROS_EXPORT_CONFIG",
+)
+@click.option(
+    "-o",
+    "--output",
+    type=click.Path(path_type=pathlib.Path, file_okay=False),
+    default=pathlib.Path.cwd() / "data-package",
+    help="Output directory for the .msg files.",
+)
+def configured_export(
+    model: capellambse.MelodyModel,
+    config: typing.TextIO,
+    output: pathlib.Path,
+):
+    """Export Capella data package to ROS messages."""
+    conf = yaml.safe_load(config)
+    _exporter = configured_exporter.Exporter(
+        conf["packages"], conf["build_ins"], conf["custom_packages"], model
+    )
+    export_data = _exporter.prepare_export_data()
+    for pkg, msgs in export_data.items():
+        _exporter.render_package(output, pkg, msgs)
 
 
 if __name__ == "__main__":
