@@ -196,19 +196,39 @@ def export_capella(
     default=pathlib.Path.cwd() / "data-package",
     help="Output directory for the .msg files.",
 )
+@click.option(
+    "--contact-email",
+    type=str,
+    default="dummy@deutschebahn.com",
+    help="E-Mail address to be places in the package.xml files.",
+)
+@click.option(
+    "-p",
+    "--project-name",
+    type=str,
+    default="custom_ros_msgs",
+    help="Project name being used in CMake and package.xml files.",
+)
 def configured_export(
     model: capellambse.MelodyModel,
     config: typing.TextIO,
     output: pathlib.Path,
+    contact_email: str,
+    project_name: str,
 ):
     """Export Capella data package to ROS messages."""
     conf = yaml.safe_load(config)
     _exporter = configured_exporter.Exporter(
-        conf["packages"], conf["build_ins"], conf["custom_packages"], model
+        conf["packages"],
+        conf["build_ins"],
+        conf["custom_packages"],
+        conf["custom_types"],
+        model,
     )
-    export_data = _exporter.prepare_export_data()
-    for pkg, msgs in export_data.items():
-        _exporter.render_package(output, pkg, msgs)
+    export_data, dependency_map = _exporter.prepare_export_data()
+    _exporter.export_ros_pkgs(
+        output, project_name, export_data, dependency_map, contact_email
+    )
 
 
 if __name__ == "__main__":
