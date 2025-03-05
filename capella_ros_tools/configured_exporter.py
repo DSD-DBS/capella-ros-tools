@@ -107,7 +107,9 @@ class Exporter:
         custom_pkg: dict[str, list[str]],
         custom_types: dict[str, str],
         model: capellambse.MelodyModel,
+        generate_cmake: bool,
     ):
+        self.generate_cmake = generate_cmake
         self.model = model
         self.packages = packages
         self.build_ins = build_ins
@@ -468,12 +470,15 @@ class Exporter:
     ):
         pkg_dir = out_dir / name
         pkg_dir.mkdir(parents=True, exist_ok=True)
-        cmake_template = self.jinja_env.get_template("cmake_pkg_level.j2")
-        cmake_path = pkg_dir / "CMakeLists.txt"
-        cmake_path.write_text(
-            cmake_template.render(pkg_name=name, dependencies=dependencies),
-            "utf-8",
-        )
+        if self.generate_cmake:
+            cmake_template = self.jinja_env.get_template("cmake_pkg_level.j2")
+            cmake_path = pkg_dir / "CMakeLists.txt"
+            cmake_path.write_text(
+                cmake_template.render(
+                    pkg_name=name, dependencies=dependencies
+                ),
+                "utf-8",
+            )
         xml_template = self.jinja_env.get_template("package.xml.j2")
         xml_path = pkg_dir / f"package.xml"
         xml_path.write_text(
@@ -493,14 +498,15 @@ class Exporter:
         contact_email: str,
     ):
         directories = topological_sort(dependencies)
-        cmake_template = self.jinja_env.get_template("cmake_top_level.j2")
-        cmake_path = out_dir / "CMakeLists.txt"
-        cmake_path.write_text(
-            cmake_template.render(
-                project_name=project_name, directories=directories
-            ),
-            "utf-8",
-        )
+        if self.generate_cmake:
+            cmake_template = self.jinja_env.get_template("cmake_top_level.j2")
+            cmake_path = out_dir / "CMakeLists.txt"
+            cmake_path.write_text(
+                cmake_template.render(
+                    project_name=project_name, directories=directories
+                ),
+                "utf-8",
+            )
         xml_template = self.jinja_env.get_template("top_level_package.xml.j2")
         xml_path = out_dir / f"package.xml"
         xml_path.write_text(

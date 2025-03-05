@@ -209,12 +209,20 @@ def export_capella(
     default="custom_ros_msgs",
     help="Project name being used in CMake and package.xml files.",
 )
+@click.option(
+    "--generate-cmake",
+    type=bool,
+    default=False,
+    is_flag=True,
+    help="Decide whether experimental cmake files should be generated.",
+)
 def configured_export(
     model: capellambse.MelodyModel,
     config: typing.TextIO,
     output: pathlib.Path,
     contact_email: str,
     project_name: str,
+    generate_cmake: bool,
 ):
     """Export Capella data package to ROS messages."""
     conf = yaml.safe_load(config)
@@ -224,6 +232,7 @@ def configured_export(
         conf["custom_packages"],
         conf["custom_types"],
         model,
+        generate_cmake,
     )
     export_data, dependency_map = _exporter.prepare_export_data()
     _exporter.export_ros_pkgs(
