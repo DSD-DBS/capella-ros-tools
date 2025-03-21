@@ -288,11 +288,13 @@ class Exporter:
                     type_name = self._make_type_name(_type)
             elif isinstance(_type, information.Class):
                 pkg = ""
+                build_in = False
                 if _type.uuid not in pkg_cls_uuids:
                     if cls_pkg := class_package_mapping.get(_type.uuid):
                         if cls_pkg != current_pkg:
                             pkg_dependencies.add(cls_pkg)
-                            if not cls_pkg in self.build_ins:
+                            build_in = cls_pkg in self.build_ins
+                            if not build_in:
                                 cls_pkg += self.pkg_postfix
                             pkg = f"{cls_pkg}/"
                     else:
@@ -302,7 +304,11 @@ class Exporter:
                             cls.name,
                         )
 
-                type_name = pkg + self._convert_cls_name(_type.name)
+                type_name = pkg + (
+                    _type.name
+                    if build_in
+                    else self._convert_cls_name(_type.name)
+                )
             else:
                 logger.error("Unknown type for property %s of class %s")
                 type_name = "unknown"
