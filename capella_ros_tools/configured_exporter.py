@@ -108,6 +108,7 @@ class Exporter:
         custom_types: dict[str, str],
         model: capellambse.MelodyModel,
         generate_cmake: bool,
+        pkg_postfix: str | None = None,
     ):
         self.generate_cmake = generate_cmake
         self.model = model
@@ -124,6 +125,7 @@ class Exporter:
                 pathlib.Path(__file__).parent / "export_templates"
             )
         )
+        self.pkg_postfix = pkg_postfix or "_interface_msgs"
 
     def _get_package_classes(
         self,
@@ -286,12 +288,12 @@ class Exporter:
                     type_name = self._make_type_name(_type)
             elif isinstance(_type, information.Class):
                 pkg = ""
-                build_in = False
                 if _type.uuid not in pkg_cls_uuids:
                     if cls_pkg := class_package_mapping.get(_type.uuid):
-                        build_in = cls_pkg in self.build_ins
                         if cls_pkg != current_pkg:
                             pkg_dependencies.add(cls_pkg)
+                            if not cls_pkg in self.build_ins:
+                                cls_pkg += self.pkg_postfix
                             pkg = f"{cls_pkg}/"
                     else:
                         logger.error(
@@ -300,11 +302,7 @@ class Exporter:
                             cls.name,
                         )
 
-                type_name = (
-                    pkg + _type.name
-                    if build_in
-                    else self._convert_cls_name(_type.name)
-                )
+                type_name = pkg + self._convert_cls_name(_type.name)
             else:
                 logger.error("Unknown type for property %s of class %s")
                 type_name = "unknown"
@@ -475,7 +473,7 @@ class Exporter:
             cmake_path = pkg_dir / "CMakeLists.txt"
             cmake_path.write_text(
                 cmake_template.render(
-                    pkg_name=name, dependencies=dependencies
+                    pkg_name=name + self.pkg_postfix, dependencies=dependencies
                 ),
                 "utf-8",
             )
@@ -483,7 +481,7 @@ class Exporter:
         xml_path = pkg_dir / f"package.xml"
         xml_path.write_text(
             xml_template.render(
-                pkg_name=name,
+                pkg_name=name + self.pkg_postfix,
                 dependencies=dependencies,
                 contact_email=contact_email,
             ),
